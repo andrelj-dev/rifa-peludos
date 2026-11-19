@@ -1,16 +1,23 @@
+/* ==========================================
+   ESTILOS GERAIS E TIPOGRAFIA
+   ========================================== */
 body {
     font-family: 'Plus Jakarta Sans', sans-serif;
     background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
     color: #0f172a;
+    margin: 0;
+    padding: 0;
 }
 
-/* Grid perfeitamente alinhada em 10 colunas por linha */
+/* ==========================================
+   GRADE DA CARTELA DE 100 NÚMEROS (10x10)
+   ========================================== */
 .num-grid {
     display: grid;
     grid-template-columns: repeat(10, minmax(0, 1fr));
     gap: 8px;
     justify-content: center;
-    max-width: 600px;
+    max-width: 650px;
     margin: 0 auto;
 }
 
@@ -21,24 +28,24 @@ body {
     justify-content: center;
     font-weight: 800;
     border-radius: 0.75rem;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
 }
 
 .num-grid button:hover {
     transform: scale(1.08);
 }
 
-.card-glow {
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+/* Ocultação limpa para o filtro de busca no JS */
+.num-grid button.hidden-number {
+    display: none !important;
 }
 
-.card-glow:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 20px 25px -5px rgba(245, 158, 11, 0.15), 0 8px 10px -6px rgba(245, 158, 11, 0.1);
-}
-
+/* ==========================================
+   ADAPTAÇÃO PARA DISPOSITIVOS MÓVEIS (RESPONSIVIDADE)
+   ========================================== */
 @media (max-width: 640px) {
     .num-grid {
-        gap: 5px;
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+        gap: 6px;
     }
 }
