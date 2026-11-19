@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rifa Solidária Beneficente | Grupo Protetores dos Cães</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap"
+    rel="stylesheet">
+  <!-- Canvas Confetti CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+  <!-- Link CSS Externo -->
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body class="pb-16 selection:bg-amber-500 selection:text-slate-950">
+
+  <!-- CABEÇALHO SUPERIOR FIXO -->
+  <header class="bg-slate-900 text-white border-b border-slate-800 sticky top-0 z-30 shadow-lg">
+    <div
+      class="max-w-6xl mx-auto px-4 py-2 bg-slate-950 border-b border-slate-800 flex flex-wrap items-center justify-between text-xs gap-2">
+      <div class="flex items-center gap-2">
+        <span
+          class="px-2.5 py-0.5 rounded-full bg-slate-800 text-slate-300 font-bold flex items-center gap-1.5 border border-slate-700">
+          <span id="mode-indicator-dot" class="w-2 h-2 rounded-full bg-emerald-400"></span>
+          <span id="mode-indicator-text">Modo Comprador (Visão Pública e Apoio)</span>
+        </span>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <button id="btn-admin-login" onclick="openAdminPinModal()"
+          class="px-3 py-1 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-slate-950 font-extrabold text-[11px] transition cursor-pointer shadow">
+          🔒 Área do Administrador
+        </button>
+        <button id="btn-admin-logout" onclick="logoutAdmin()"
+          class="hidden px-3 py-1 rounded-xl bg-slate-800 hover:bg-slate-700 text-red-400 font-bold text-[11px] transition cursor-pointer">
+          🚪 Sair do Modo Admin
+        </button>
+      </div>
+    </div>
+
+    <div class="max-w-6xl mx-auto px-4 py-3 flex flex-col md:flex-row md:items-center justify-between gap-3">
+      <div class="flex items-center gap-3">
+        <div
+          class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-amber-500 to-orange-400 text-slate-950 font-black flex items-center justify-center text-xl shadow-lg shadow-amber-500/20">
+          🐾
+        </div>
+        <div>
+          <h1 class="font-bold text-base text-white">Grupo Protetores dos Cães</h1>
+          <p class="text-xs text-slate-400">Sistema Oficial de Rifas e Arrecadações Beneficentes</p>
+        </div>
+      </div>
+
+      <div class="flex flex-wrap items-center gap-2">
+        <div class="flex items-center gap-1.5 bg-slate-800 border border-slate-700 p-1 rounded-xl">
+          <button onclick="shareAppOnWhatsApp()"
+            class="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center gap-1.5 shadow transition cursor-pointer">
+            📲 Link WhatsApp
+          </button>
+          <button onclick="copyAppLink()"
+            class="px-3 py-1.5 rounded-lg bg-slate-700 hover:bg-slate-600 text-slate-200 font-bold text-xs flex items-center gap-1.5 transition cursor-pointer">
+            📋 Copiar Link
+          </button>
+        </div>
+
+        <div id="admin-raised-badge"
+          class="hidden bg-slate-800/80 border border-slate-700 px-3 py-1.5 rounded-xl text-xs items-center gap-2">
+          <span class="text-slate-400">Arrecadado (Pago):</span>
+          <strong id="total-raised-badge" class="text-emerald-400 font-bold">R$ 0,00</strong>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- BARRA DE ABAS DO APLICATIVO -->
+  <div class="bg-white/90 backdrop-blur-md border-b border-slate-200/80 shadow-xs sticky top-[103px] z-20">
+    <div class="max-w-5xl mx-auto px-4 flex items-center gap-2 overflow-x-auto py-2.5 text-xs font-bold">
+      <button id="tab-btn-board" onclick="switchTab('board')"
+        class="px-4 py-2 rounded-xl bg-amber-500 text-slate-950 font-extrabold flex items-center gap-1.5 transition">
+        🎟️ Cartela de Números
+      </button>
+      <button id="tab-btn-campaigns" onclick="switchTab('campaigns')"
+        class="px-4 py-2 rounded-xl text-slate-600 hover:bg-slate-100 flex items-center gap-1.5 transition">
+        📢 Campanhas e Cães
+      </button>
+      <button id="tab-btn-financial" onclick="switchTab('financial')"
+        class="px-4 py-2 rounded-xl text-slate-600 hover:bg-slate-100 flex items-center gap-1.5 transition">
+        📊 Painel Financeiro <span id="badge-admin-tab-fin"
+          class="text-[10px] bg-amber-200 text-amber-900 px-1.5 py-0.5 rounded-full">Admin</span>
+      </button>
+      <button id="tab-btn-draw" onclick="switchTab('draw')"
+        class="px-4 py-2 rounded-xl text-slate-600 hover:bg-slate-100 flex items-center gap-1.5 transition">
+        🏆 Sorteador <span class="text-[10px] bg-red-200 text-red-900 px-1.5 py-0.5 rounded-full">ADM Maior</span>
+      </button>
+      <button id="tab-btn-settings" onclick="switchTab('settings')"
+        class="px-4 py-2 rounded-xl text-slate-600 hover:bg-slate-100 flex items-center gap-1.5 transition">
+        ⚙️ Configurações <span class="text-[10px] bg-red-200 text-red-900 px-1.5 py-0.5 rounded-full">ADM Maior</span>
+      </button>
+    </div>
+  </div>
+
+  <main class="max-w-5xl mx-auto px-4 pt-6 space-y-6">
+
+    <!-- OVERVIEW CARD PRINCIPAL -->
+    <div
+      class="bg-white rounded-3xl border border-slate-200/90 p-5 shadow-xl shadow-slate-200/50 space-y-5 relative overflow-hidden">
+      <div class="absolute -right-10 -top-10 w-40 h-40 bg-amber-400/10 rounded-full blur-2xl pointer-events-none"></div>
+      <div class="flex flex-col md:flex-row items-center justify-between gap-5 relative z-10">
+        <div class="flex items-center gap-4">
+          <div class="relative shrink-0 group cursor-pointer" onclick="switchTab('campaigns')">
+            <img id="dog-photo-img" src="" alt="Cão Beneficiado"
+              class="w-24 h-24 rounded-2xl object-cover object-center border-4 border-amber-400 shadow-md transform group-hover:scale-105 transition duration-300 bg-slate-100">
+            <span
+              class="absolute -bottom-2 -right-2 bg-gradient-to-r from-amber-500 to-orange-500 text-slate-950 font-black text-[10px] px-2 py-0.5 rounded-full shadow-md border border-white">
+              🐶 Perfil
+            </span>
+          </div>
+          <div>
+            <div class="flex items-center gap-2 flex-wrap">
+              <span id="dog-name-badge"
+                class="px-3 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-900 border border-amber-200/60 shadow-xs">Cão:
+                -</span>
+              <span id="dog-age-badge"
+                class="px-3 py-1 rounded-full text-xs font-bold bg-orange-100 text-orange-900 border border-orange-200/60 shadow-xs">Idade:
+                -</span>
+              <span id="campaign-badge"
+                class="px-3 py-1 rounded-full text-xs font-bold bg-indigo-100 text-indigo-900 border border-indigo-200/60 shadow-xs">Campanha:
+                -</span>
+            </div>
+            <h2 id="raffle-title-text" class="text-2xl font-black text-slate-900 mt-2">Rifa Beneficente</h2>
+            <p class="text-xs text-slate-600 mt-1">Prêmio: <strong id="raffle-prize-text"
+                class="text-slate-900">-</strong> • Valor: <strong id="raffle-price-text"
+                class="text-slate-900">-</strong></p>
+          </div>
+        </div>
+
+        <div
+          class="bg-gradient-to-br from-slate-900 to-slate-950 text-white rounded-2xl p-4 min-w-[280px] text-center shadow-lg border border-slate-800">
+          <p class="text-[10px] font-extrabold text-amber-400 uppercase tracking-wider">Chave Pix Oficial para Pagamento
+          </p>
+          <p id="pix-key-display" class="text-sm font-mono font-bold text-white my-1.5 select-all">-</p>
+          <p class="text-[10px] text-slate-400 mb-3">Titular: Grupo Protetores dos Cães</p>
+          <button onclick="copyPixKey()"
+            class="w-full py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-slate-950 font-black text-xs shadow-md transition transform active:scale-95 cursor-pointer">
+            📋 Copiar Chave Pix
+          </button>
+        </div>
+      </div>
+
+      <div id="overview-progress-section" class="pt-4 border-t border-slate-100"></div>
+    </div>
+
+    <!-- CARTELA DE NÚMEROS (10 EM 10) -->
+    <div id="view-board" class="space-y-4">
+      <div class="bg-white rounded-3xl border border-slate-200/90 p-5 shadow-sm space-y-4">
+        <div class="flex flex-col sm:flex-row items-center justify-between gap-3 border-b border-slate-100 pb-3">
+          <div class="flex items-center gap-2 text-xs font-bold">
+            <span class="px-3 py-1 rounded-lg bg-emerald-100 text-emerald-800 border border-emerald-200">🟢 Livre</span>
+            <span class="px-3 py-1 rounded-lg bg-amber-100 text-amber-800 border border-amber-200">🟡 Reservado</span>
+            <span class="px-3 py-1 rounded-lg bg-blue-100 text-blue-800 border border-blue-200">🔵 Pago</span>
+          </div>
+          <input type="text" id="search-input" onkeyup="filterNumbers()" placeholder="Buscar número ou nome..."
+            class="bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-xs text-slate-900 w-full sm:w-64 focus:outline-none focus:ring-2 focus:ring-amber-500">
+        </div>
+
+        <div id="numbers-grid" class="num-grid"></div>
+      </div>
+    </div>
+
+    <!-- CAMPANHAS E CÃES -->
+    <div id="view-campaigns" class="hidden space-y-6">
+      <div id="admin-dogs-manager" class="hidden bg-white rounded-3xl border border-slate-200 p-6 shadow-sm space-y-4">
+        <h3 class="text-lg font-black text-slate-900 flex items-center gap-2">
+          <span>🐶</span> Cadastrar Novo Cão ou Atualizar Foto
+        </h3>
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-3 items-end">
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Nome do Cão *</label>
+            <input type="text" id="new-dog-name" placeholder="Ex: Rex"
+              class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-xs font-semibold">
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Idade do Cão *</label>
+            <input type="text" id="new-dog-age" placeholder="Ex: 2 anos"
+              class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-xs font-semibold">
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Arquivo da Foto *</label>
+            <input type="file" id="new-dog-file" accept="image/*"
+              class="w-full bg-slate-50 border border-slate-200 rounded-xl p-1.5 text-xs">
+          </div>
+          <button onclick="addDog()"
+            class="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-slate-950 font-black rounded-xl px-4 py-2.5 text-xs shadow-md cursor-pointer transition">
+            ➕ Cadastrar Cão
+          </button>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-3xl border border-slate-200/90 p-6 shadow-sm space-y-5">
+        <div>
+          <h3 class="text-xl font-black text-slate-900">🐾 Cães Assistidos pelas Campanhas</h3>
+          <p class="text-xs text-slate-500">Conheça os patudos beneficiados e clique em apoiar para direcionar sua rifa.
+          </p>
+        </div>
+        <div id="dogs-list-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+      </div>
+
+      <div id="admin-campaigns-manager"
+        class="hidden bg-white rounded-3xl border border-slate-200 p-6 shadow-sm space-y-4">
+        <h3 class="text-lg font-black text-slate-900">📢 Gerenciar Campanhas de Arrecadação</h3>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-3 items-end">
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Nome da Campanha</label>
+            <input type="text" id="new-campaign-name" placeholder="Ex: Cirurgia Urgente"
+              class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-xs font-semibold">
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Descrição Breve</label>
+            <input type="text" id="new-campaign-desc" placeholder="Descrição da meta"
+              class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-xs font-semibold">
+          </div>
+          <button onclick="addCampaign()"
+            class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl px-4 py-2.5 text-xs shadow cursor-pointer">
+            ➕ Criar Campanha
+          </button>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-3xl border border-slate-200/90 p-6 shadow-sm space-y-4">
+        <h3 class="text-lg font-black text-slate-900">📋 Campanhas Ativas</h3>
+        <div id="campaigns-list-container" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+      </div>
+    </div>
+
+    <!-- PAINEL FINANCEIRO E PRESTAÇÃO DE CONTAS -->
+    <div id="view-financial" class="hidden space-y-6">
+      <div class="bg-white rounded-3xl border border-slate-200 p-6 shadow-sm space-y-6">
+        <div class="flex items-center justify-between">
+          <h3 class="text-lg font-black text-slate-900">📊 Painel Financeiro e Controle</h3>
+          <span class="px-3 py-1 rounded-full bg-amber-100 text-amber-900 text-xs font-bold">Modo Administrador</span>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div class="bg-emerald-50 border border-emerald-200 rounded-2xl p-4">
+            <p class="text-xs font-bold text-emerald-800 uppercase">Confirmado Pago (Computado)</p>
+            <p id="fin-paid-amount" class="text-2xl font-black text-emerald-900 mt-1">R$ 0,00</p>
+            <p id="fin-paid-count" class="text-xs text-emerald-700 mt-1">0 bilhetes</p>
+          </div>
+          <div class="bg-amber-50 border border-amber-200 rounded-2xl p-4">
+            <p class="text-xs font-bold text-amber-800 uppercase">Pendente / Reservado</p>
+            <p id="fin-reserved-amount" class="text-2xl font-black text-amber-900 mt-1">R$ 0,00</p>
+            <p id="fin-reserved-count" class="text-xs text-amber-700 mt-1">0 bilhetes (Não computado)</p>
+          </div>
+          <div class="bg-indigo-50 border border-indigo-200 rounded-2xl p-4">
+            <p class="text-xs font-bold text-indigo-800 uppercase">Meta do Tratamento</p>
+            <p id="fin-goal-amount-display" class="text-2xl font-black text-indigo-900 mt-1">R$ 1.000,00</p>
+            <p id="fin-goal-remaining" class="text-xs text-indigo-700 mt-1">Falta R$ 0,00</p>
+          </div>
+        </div>
+
+        <!-- PRESTAÇÃO DE CONTAS (LIVRO CAIXA) -->
+        <div class="bg-slate-50 border border-slate-200 rounded-3xl p-5 space-y-4">
+          <div
+            class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 border-b border-slate-200 pb-3">
+            <div>
+              <h4 class="font-black text-slate-900 text-sm">📋 Prestação de Contas (Livro Caixa)</h4>
+              <p class="text-xs text-slate-500">Transparência de valores arrecadados e saídas para compradores e ADMs.
+              </p>
+            </div>
+            <div class="flex items-center gap-2 flex-wrap">
+              <button onclick="shareAccountabilityWhatsApp()"
+                class="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-xs cursor-pointer">📲
+                WhatsApp</button>
+              <button onclick="shareAccountabilityEmail()"
+                class="px-3 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs shadow-xs cursor-pointer">📧
+                E-mail</button>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div class="bg-white border border-slate-200 rounded-2xl p-3 shadow-xs">
+              <span class="text-[11px] font-bold text-slate-500 uppercase">Total Entradas (Pagas)</span>
+              <p id="box-total-in" class="text-xl font-black text-emerald-600 mt-1">R$ 0,00</p>
+            </div>
+            <div class="bg-white border border-slate-200 rounded-2xl p-3 shadow-xs">
+              <span class="text-[11px] font-bold text-slate-500 uppercase">Total Saídas / Gastos</span>
+              <p id="box-total-out" class="text-xl font-black text-red-600 mt-1">R$ 0,00</p>
+            </div>
+            <div class="bg-white border border-slate-200 rounded-2xl p-3 shadow-xs">
+              <span class="text-[11px] font-bold text-slate-500 uppercase">Saldo Líquido em Caixa</span>
+              <p id="box-net-balance" class="text-xl font-black text-slate-900 mt-1">R$ 0,00</p>
+            </div>
+          </div>
+
+          <div id="admin-expense-form" class="hidden bg-white border border-slate-200 rounded-2xl p-4 space-y-3">
+            <h5 class="font-bold text-slate-900 text-xs uppercase">➕ Registrar Nova Saída / Despesa</h5>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+              <input type="text" id="expense-desc" placeholder="Ex: Compra de ração / Consulta Vet"
+                class="bg-slate-50 border border-slate-200 rounded-xl p-2 text-xs">
+              <input type="number" id="expense-amount" placeholder="Valor (R$)"
+                class="bg-slate-50 border border-slate-200 rounded-xl p-2 text-xs">
+              <button onclick="addExpense()"
+                class="bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-xl py-2 text-xs shadow cursor-pointer">Salvar
+                Despesa</button>
+            </div>
+          </div>
+
+          <div>
+            <h5 class="font-bold text-slate-800 text-xs mb-2">Histórico de Saídas Discriminadas</h5>
+            <div class="overflow-x-auto border border-slate-200 rounded-2xl bg-white">
+              <table class="w-full text-left text-xs text-slate-700">
+                <thead class="bg-slate-100 font-bold border-b border-slate-200">
+                  <tr>
+                    <th class="p-2.5">Data / Hora</th>
+                    <th class="p-2.5">Descrição da Saída</th>
+                    <th class="p-2.5 text-right">Valor</th>
+                    <th class="p-2.5 text-right">Ação</th>
+                  </tr>
+                </thead>
+                <tbody id="expenses-table-body" class="divide-y divide-slate-100"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <div class="overflow-x-auto border border-slate-200 rounded-2xl">
+          <table class="w-full text-left text-xs text-slate-700">
+            <thead class="bg-slate-100 font-bold text-slate-800 border-b border-slate-200">
+              <tr>
+                <th class="p-3">Nº</th>
+                <th class="p-3">Comprador</th>
+                <th class="p-3">Telefone / WhatsApp</th>
+                <th class="p-3">Status</th>
+                <th class="p-3">Voluntário Responsável</th>
+                <th class="p-3 text-right">Ações Admin</th>
+              </tr>
+            </thead>
+            <tbody id="fin-table-body" class="divide-y divide-slate-100 bg-white"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- SORTEADOR (EXCLUSIVO ADM MAIOR) -->
+    <div id="view-draw" class="hidden space-y-6">
+      <div
+        class="bg-slate-900 text-white rounded-3xl p-8 text-center space-y-5 border-4 border-amber-400 shadow-2xl max-w-xl mx-auto">
+        <span
+          class="px-3 py-1 rounded-full bg-red-500/20 text-red-300 border border-red-500/30 text-xs font-extrabold uppercase">Exclusivo
+          ADM Maior</span>
+        <h3 class="text-xl font-black text-amber-400">🏆 Sorteador Oficial de Prêmios</h3>
+        <p class="text-xs text-slate-300">O sorteio realiza-se exclusivamente entre os bilhetes com pagamento confirmado
+          (azuis).</p>
+        <div id="winner-display"
+          class="font-mono text-7xl font-black text-white bg-slate-950/80 py-6 rounded-2xl border border-slate-800 tracking-widest my-4 shadow-inner">
+          ??</div>
+        <button onclick="runDraw()"
+          class="px-8 py-3 rounded-2xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-slate-950 font-black text-base transition shadow-lg cursor-pointer transform active:scale-95">
+          🎯 Realizar Sorteio Aleatório
+        </button>
+      </div>
+    </div>
+
+    <!-- CONFIGURAÇÕES E CADASTROS (EXCLUSIVO ADM MAIOR) -->
+    <div id="view-settings" class="hidden space-y-6">
+      <div class="bg-white rounded-3xl border border-slate-200 p-6 shadow-sm space-y-5 max-w-2xl mx-auto">
+        <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+          <h3 class="text-lg font-black text-slate-900">⚙️ Configurações e Gestão</h3>
+          <span class="px-3 py-1 rounded-full bg-red-100 text-red-900 text-xs font-bold">Restrito: ADM Maior</span>
+        </div>
+
+        <!-- CADASTRO DE VOLUNTÁRIOS E DIVULGADORES (COM E-MAIL) -->
+        <div class="bg-slate-50 border border-slate-200 rounded-2xl p-4 space-y-4">
+          <h4 class="font-bold text-slate-900 text-xs uppercase flex items-center justify-between">
+            <span>🤝 Cadastro de Voluntários e Divulgadores</span>
+            <span id="volunteers-count" class="text-amber-600">0 cadastrados</span>
+          </h4>
+          <p class="text-[11px] text-slate-500">Cadastre nome, telefone e e-mail. Permite disparos em massa e relatórios
+            individuais.</p>
+
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+            <input type="text" id="new-vol-name" placeholder="Nome do Voluntário"
+              class="bg-white border border-slate-200 rounded-xl p-2 text-xs font-semibold">
+            <input type="text" id="new-vol-phone" placeholder="WhatsApp (ex: 11988887777)"
+              class="bg-white border border-slate-200 rounded-xl p-2 text-xs font-mono">
+            <input type="email" id="new-vol-email" placeholder="E-mail de contato"
+              class="bg-white border border-slate-200 rounded-xl p-2 text-xs">
+          </div>
+          <div class="flex items-center justify-between flex-wrap gap-2 pt-1">
+            <button onclick="registerVolunteer()"
+              class="bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-xl px-4 py-2 text-xs shadow cursor-pointer">➕
+              Cadastrar Voluntário</button>
+            <button onclick="broadcastToAll()"
+              class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl px-4 py-2 text-xs shadow cursor-pointer">📢
+              Disparar p/ Todos (1-Click)</button>
+          </div>
+
+          <div id="volunteers-list" class="space-y-2 pt-2"></div>
+        </div>
+
+        <!-- GERENCIAR ADM MENORES (Até 4) -->
+        <div class="bg-slate-50 border border-slate-200 rounded-2xl p-4 space-y-4">
+          <h4 class="font-bold text-slate-900 text-xs uppercase flex items-center justify-between">
+            <span>👥 Administradores Menores (Até 4)</span>
+            <span id="sub-admin-count" class="text-amber-600">0 / 4 cadastrados</span>
+          </h4>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+            <input type="text" id="new-subadmin-name" placeholder="Nome do ADM"
+              class="bg-white border border-slate-200 rounded-xl p-2 text-xs font-semibold">
+            <input type="password" id="new-subadmin-pin" maxlength="6" placeholder="PIN (ex: 1234)"
+              class="bg-white border border-slate-200 rounded-xl p-2 text-xs font-mono">
+            <button onclick="registerSubAdmin()"
+              class="bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-xl py-2 text-xs shadow cursor-pointer">➕
+              Cadastrar ADM</button>
+          </div>
+          <div id="sub-admins-list" class="space-y-2 pt-2"></div>
+        </div>
+
+        <!-- APROVAÇÕES PENDENTES -->
+        <div id="pending-approvals-section" class="bg-amber-50 border border-amber-200 rounded-2xl p-4 space-y-3">
+          <h4 class="font-bold text-amber-900 text-xs uppercase flex items-center gap-1.5">
+            <span>🔔</span> Supervisão de Ações dos ADM Menores
+          </h4>
+          <div id="pending-approvals-list" class="space-y-2 text-xs">
+            <p class="text-slate-500 italic">Nenhuma solicitação pendente.</p>
+          </div>
+        </div>
+
+        <div class="space-y-4 text-xs pt-3 border-t border-slate-100">
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">Título da Rifa</label>
+            <input type="text" id="cfg-title"
+              class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-slate-900 font-semibold"
+              value="Rifa Beneficente de Arrecadação">
+          </div>
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block font-bold text-slate-700 mb-1">Cão Beneficiado Padrão</label>
+              <select id="cfg-dog-select"
+                class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 font-bold"></select>
+            </div>
+            <div>
+              <label class="block font-bold text-slate-700 mb-1">Campanha Ativa</label>
+              <select id="cfg-campaign-select"
+                class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 font-bold"></select>
+            </div>
+          </div>
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">Descrição do Prêmio</label>
+            <input type="text" id="cfg-prize"
+              class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-slate-900 font-semibold"
+              value="Pix de R$ 500,00 ou Cesta Especial">
+          </div>
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block font-bold text-slate-700 mb-1">Valor do Bilhete (R$)</label>
+              <input type="number" id="cfg-price"
+                class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-slate-900 font-semibold"
+                value="10">
+            </div>
+            <div>
+              <label class="block font-bold text-slate-700 mb-1">Meta de Arrecadação (R$)</label>
+              <input type="number" id="cfg-goal"
+                class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-slate-900 font-semibold"
+                value="1000">
+            </div>
+          </div>
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">Chave Pix do Grupo</label>
+            <input type="text" id="cfg-pix"
+              class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-slate-900 font-mono font-bold"
+              value="protetores.caes@gmail.com">
+          </div>
+          <div class="pt-3 border-t border-slate-100 flex items-center justify-between">
+            <button onclick="resetRaffleData()"
+              class="px-4 py-2 rounded-xl bg-red-100 hover:bg-red-200 text-red-700 font-bold">⚠️ Resetar
+              Cartela</button>
+            <button onclick="saveRaffleSettings()"
+              class="px-6 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-slate-950 font-extrabold shadow cursor-pointer">💾
+              Salvar Configurações</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- MODAL DE LOGIN ADMIN / PIN -->
+  <div id="modal-admin-pin"
+    class="fixed inset-0 bg-slate-950/80 backdrop-blur-xs hidden items-center justify-center p-4 z-50">
+    <div class="bg-white rounded-3xl max-w-sm w-full p-6 text-center space-y-4 shadow-2xl border border-slate-200">
+      <div
+        class="w-12 h-12 rounded-2xl bg-amber-500/20 text-amber-600 flex items-center justify-center mx-auto border border-amber-500/30">
+        🔒</div>
+      <div>
+        <h3 class="font-extrabold text-lg text-slate-900">Área do Administrador</h3>
+        <p class="text-xs text-slate-600 mt-1">Informe sua senha PIN para aceder ao sistema.</p>
+      </div>
+      <div>
+        <input type="password" id="admin-pin-input" maxlength="6" placeholder="****"
+          class="w-36 mx-auto text-center font-mono text-2xl tracking-widest bg-slate-100 border border-slate-300 rounded-2xl p-2 text-slate-900 focus:outline-none focus:ring-2 focus:ring-amber-500">
+        <p class="text-[11px] text-slate-400 mt-1">(PIN ADM Maior: <strong>9999</strong> ou PIN de um ADM Menor
+          cadastrado)</p>
+        <p id="admin-pin-error" class="hidden text-xs font-bold text-red-600 mt-1.5">Senha PIN incorreta!</p>
+      </div>
+      <div class="flex items-center justify-center gap-2 pt-2 border-t border-slate-100">
+        <button onclick="closeAdminPinModal()"
+          class="px-4 py-2 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-100 cursor-pointer">Voltar</button>
+        <button onclick="verifyAdminPin()"
+          class="px-5 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-bold shadow cursor-pointer">Entrar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL DE COMPRA / RESERVA -->
+  <div id="modal-buy"
+    class="fixed inset-0 bg-slate-950/80 backdrop-blur-xs hidden items-center justify-center p-4 z-50">
+    <div class="bg-white rounded-3xl max-w-md w-full p-6 space-y-4 shadow-2xl">
+      <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+        <h3 class="font-bold text-slate-900 text-base">Número <span id="modal-num-title"
+            class="text-amber-600 font-extrabold"></span></h3>
+        <button id="btn-release-num" onclick="releaseSelectedNumber()"
+          class="hidden px-2.5 py-1 rounded-xl bg-red-100 hover:bg-red-200 text-red-700 font-bold text-xs cursor-pointer">🗑️
+          Liberar Número</button>
+      </div>
+
+      <div id="admin-status-controls"
+        class="hidden bg-slate-100 p-2 rounded-2xl flex items-center gap-2 text-xs font-bold">
+        <button id="btn-status-paid" onclick="setModalStatus('paid')"
+          class="flex-1 py-2 rounded-xl bg-slate-200 text-slate-700 font-bold cursor-pointer">🔵 Confirmar Pago</button>
+        <button id="btn-status-reserved" onclick="setModalStatus('reserved')"
+          class="flex-1 py-2 rounded-xl bg-amber-400 text-slate-950 font-bold cursor-pointer">🟡 Reservar
+          (Pendente)</button>
+      </div>
+
+      <div>
+        <label class="block text-xs font-bold text-slate-700 mb-1">Nome do Comprador *</label>
+        <input type="text" id="buyer-name"
+          class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-xs text-slate-900"
+          placeholder="Ex: Maria da Silva">
+      </div>
+
+      <div>
+        <label class="block text-xs font-bold text-slate-700 mb-1">WhatsApp / Telefone *</label>
+        <input type="text" id="buyer-phone"
+          class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-xs text-slate-900"
+          placeholder="(11) 98765-4321">
+      </div>
+
+      <div>
+        <label class="block text-xs font-bold text-slate-700 mb-1">Voluntário Responsável *</label>
+        <select id="seller-name"
+          class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-xs text-slate-900 font-bold">
+          <option value="">Selecione um voluntário...</option>
+        </select>
+      </div>
+
+      <button id="btn-whatsapp-action" onclick="sendWhatsappAction()"
+        class="w-full py-2.5 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow cursor-pointer">
+        📲 Enviar Reserva no WhatsApp
+      </button>
+
+      <input type="hidden" id="buyer-status" value="reserved">
+
+      <div class="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
+        <button onclick="closeModal()"
+          class="px-4 py-2 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-100 cursor-pointer">Fechar</button>
+        <button id="btn-save-modal" onclick="confirmPurchase()"
+          class="px-5 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-bold shadow cursor-pointer">Confirmar
+          Reserva</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Link JS Externo -->
+  <script src="script.js"></script>
+</body>
+
+</html>

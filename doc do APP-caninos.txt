@@ -1,0 +1,35 @@
+1: Colocar as cartelas alinhadas. Resposta: perfeito rodando.
+
+2: colocar disponivel no modo cliente somente acesso as campanhas,
+ sem permitir alterar nada somente,
+ os ADM poderam realizar lancamentos de campanhas ou alterar qualquer informação do APP,
+ sorteios de rifa seram realizados somente pelo ADM maior,
+ todas as outras funções seram supervisionadas pelo ADM maior,
+ podendo o mesmo autorizar as mudanças ou não. resposta: perfeito rodando.
+
+3: O ADM maior saberar sempre que algum outro adm entrar para configurar ou lançar campanha no APP. Resposta: perfeito rodando.
+
+4: Permitir os ADM colocar img de cães novos ou dos mesmos no APP atraves de login de ADM. Resposta: Rodando perfeito.
+
+5: Permitir que estas fotos sejam colocadas na mesma resolução das outras imgs. resposta: verificar ainda
+
+6: senha do ADM maior no sistema do APP 9999. Senha de adm menores APP: 1234. resposta: perfeito rodando.
+
+6: Cadastro de ADM menores com 4 outros a baixo da supervisão do ADM maior e sendo cadastrado no sistema pelo mesmo. resposta: perfeito rodando.
+
+7:ADM Suzana Santos cadastrada COM sENHA: 12345. rodando perfeito. no app melhorias a senha: 6904 e adm menor senha: 1234.
+
+7: Todo sorteio ao ser realizado com campanhas diversas,
+de cães diferentes,
+ ficarar registrado no app com numero e nome da pessoa ganhadora,
+ explicito de forma que todos vejam o ganhador,
+ e o mesmo receberar uma resposta via rede social cadastrada,
+ que ele ou ela foi a ganhadora ou o ganhador.
+
+8: Não permitir que o mesmo nome seja cadatrado como membro ou colaborador duas vezes ou mais.
+
+9: 
+
+
+
+ 
