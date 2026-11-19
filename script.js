@@ -43,14 +43,14 @@ function formatTicketNumber(num) {
 function createInitialTickets() {
     let list = [];
     for (let i = 1; i <= 100; i++) {
-        list.push({ 
-            number: i, 
-            status: 'available', 
-            buyerName: '', 
-            buyerPhone: '', 
-            sellerName: 'Voluntário', 
-            reservedAt: null, 
-            ticketPrice: TICKET_PRICE 
+        list.push({
+            number: i,
+            status: 'available',
+            buyerName: '',
+            buyerPhone: '',
+            sellerName: 'Voluntário',
+            reservedAt: null,
+            ticketPrice: TICKET_PRICE
         });
     }
     return list;
@@ -285,37 +285,35 @@ async function confirmPurchase() {
     }
 }
 
+// INTEGRAÇÃO ATUALIZADA USANDO NETLIFY FUNCTION (SEM ERROS DE CORS)
 async function processRealBankApiPayment(payload) {
-    if (PAYMENT_API_TOKEN && PAYMENT_API_ENDPOINT) {
-        try {
-            const response = await fetch(PAYMENT_API_ENDPOINT, {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${PAYMENT_API_TOKEN}`,
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    transaction_amount: payload.amount,
-                    description: `Rifa: ${payload.raffleName} (Bilhetes: ${payload.numbers.join(', ')})`,
-                    payment_method_id: payload.method === 'debito_conta' ? "bank_transfer" : "pix",
-                    payer: {
-                        first_name: payload.name,
-                        phone: { number: payload.phone },
-                        identification: { type: "CPF", number: payload.cpf }
-                    }
-                })
-            });
+    try {
+        const response = await fetch('/.netlify/functions/criar-pagamento', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                ...payload,
+                fallbackToken: PAYMENT_API_TOKEN
+            })
+        });
 
-            if (!response.ok) throw new Error(`Falha HTTP: ${response.status}`);
-            const data = await response.json();
+        const data = await response.json();
 
-            return {
-                pixCopiaCola: data.point_of_interaction?.transaction_data?.qr_code || "Código de pagamento gerado",
-                qrCodeUrl: data.point_of_interaction?.transaction_data?.qr_code_base64 ? `data:image/png;base64,${data.point_of_interaction.transaction_data.qr_code_base64}` : `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(GLOBAL_OFFICIAL_PIX)}`
-            };
-        } catch (err) {
-            console.warn("Modo Sandbox Fallback:", err.message);
+        if (!response.ok || !data.success) {
+            throw new Error(data.error || `Falha HTTP: ${response.status}`);
         }
+
+        return {
+            pixCopiaCola: data.pixCopiaCola || "Código de pagamento gerado",
+            qrCodeUrl: data.qrCodeBase64
+                ? `data:image/png;base64,${data.qrCodeBase64}`
+                : `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(data.pixCopiaCola || GLOBAL_OFFICIAL_PIX)}`
+        };
+
+    } catch (err) {
+        console.warn("Aviso API / Modo Sandbox Fallback ativado:", err.message);
     }
 
     const dummyCode = `00020126580014BR.GOV.BCB.PIX0136${GLOBAL_OFFICIAL_PIX}5204000053039865405${payload.amount.toFixed(2)}5802BR5925PROTETORES DOS CAES6009SAO PAULO62070503***6304E2CA`;
@@ -595,7 +593,7 @@ function renderCampaignsUI() {
 
     rafflesList.forEach(raf => {
         const isSelected = raf.id === activeRaffleId;
-        
+
         let totalVal = 0;
         if (raf.tickets) {
             raf.tickets.forEach(t => {
@@ -1083,7 +1081,6 @@ function renderFinancialTable() {
     }
 }
 
-// CORREÇÃO CRÍTICA NA GERAÇÃO DE RELATÓRIOS
 function dispatchFinancialReport() {
     if (userRole !== 'super_admin') return alert("Exclusivo do ADM Maior.");
 
